@@ -105,7 +105,9 @@ class LitBaseline(pl.LightningModule):
         # Calc regrets
         t0 = time()
         x_t_x = torch.matmul(features.t(), features)
-        _, s, _ = torch.linalg.svd(x_t_x, compute_uv=False)
+        _, s, _ = torch.svd(x_t_x,
+                                   compute_uv=False
+                                   )
         logger.info(f"Training set singular values largest: {s[:5]}")
         logger.info(f"Training set singular values smallest: {s[-5:]}")
         # self.x_t_x_inv = torch.linalg.inv(x_t_x) if s[-1] > 1e-16 else torch.linalg.pinv(x_t_x, hermitian=True)

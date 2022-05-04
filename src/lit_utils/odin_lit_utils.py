@@ -84,7 +84,7 @@ class LitOdin(LitBaseline):
                 torch.LongTensor([2]).cuda(),
                 gradient.index_select(1, torch.LongTensor([2]).cuda()) / (66.7 / 255.0),
             )
-        elif model_name == "resnet":
+        elif "resnet" in model_name.lower():
             gradient.index_copy_(
                 1,
                 torch.LongTensor([0]).cuda(),

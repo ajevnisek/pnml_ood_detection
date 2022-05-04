@@ -195,7 +195,7 @@ def get_data_transform(model_name: str):
             ]
         )
 
-    elif model_name == "resnet":
+    elif "resnet" in model_name.lower():
         data_transform = transforms.Compose(
             [
                 transforms.CenterCrop(size=(32, 32)),

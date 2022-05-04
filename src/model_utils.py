@@ -11,6 +11,9 @@ from model_arch_utils.densenet import DenseNet3
 from model_arch_utils.densenet_gram import DenseNet3Gram
 from model_arch_utils.resnet import ResNet34
 from model_arch_utils.resnet_gram import ResNet34Gram
+from model_arch_utils.our_resnets import ResNet18
+from model_arch_utils.our_resnets import ResNet34 as OurResNet34
+from model_arch_utils.madrys_resnet import MadrysResnet
 from model_arch_utils.wrn import WideResNet
 import types
 
@@ -28,6 +31,27 @@ def get_model(
             model = DenseNet3(100, 10)
         elif trainset_name == "cifar100":
             model = DenseNet3(100, 100)
+        else:
+            raise ValueError(f"trainset_name={trainset_name} is not supported")
+    elif model_name == 'MadrysResnet':
+        if trainset_name in ['cifar10']:
+            model = MadrysResnet(10)
+        elif trainset_name == 'cifar100':
+            model = MadrysResnet(100)
+        else:
+            raise ValueError(f"trainset_name={trainset_name} is not supported")
+    elif model_name == "resnet18":
+        if trainset_name in ["cifar10", "svhn"]:
+            model = ResNet18(10)
+        elif trainset_name == "cifar100":
+            model = ResNet18(100)
+        else:
+            raise ValueError(f"trainset_name={trainset_name} is not supported")
+    elif model_name == "resnet34":
+        if trainset_name in ["cifar10", "svhn"]:
+            model = OurResNet34(10)
+        elif trainset_name == "cifar100":
+            model = OurResNet34(100)
         else:
             raise ValueError(f"trainset_name={trainset_name} is not supported")
     elif model_name == "resnet":
