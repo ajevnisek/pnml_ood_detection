@@ -194,8 +194,7 @@ def get_data_transform(model_name: str):
                 ),
             ]
         )
-
-    elif "resnet" in model_name.lower():
+    elif "resnet" == model_name:
         data_transform = transforms.Compose(
             [
                 transforms.CenterCrop(size=(32, 32)),
@@ -203,6 +202,12 @@ def get_data_transform(model_name: str):
                 transforms.Normalize(
                     (0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)
                 ),
+            ]
+        )
+    elif "resnet" in model_name.lower():
+        data_transform = transforms.Compose(
+            [
+                transforms.ToTensor(),
             ]
         )
     elif model_name == "wrn":
@@ -257,6 +262,74 @@ def get_dataloaders(
         data_transform, osj(root, "svhn"), batch_size, n_workers
     )
 
+    if model_name != 'resnet' and 'resnet' in model_name.lower():
+        # normalize = transforms.Normalize(mean=[0.4914, 0.4824, 0.4467],
+        #                                  std=[0.2471, 0.2435, 0.2616])
+        train_set = datasets.CIFAR10('data/', train=True, download=True,
+                                     transform=transforms.Compose([
+                                         transforms.RandomCrop(32, padding=4),
+                                         transforms.RandomHorizontalFlip(),
+                                         transforms.ToTensor(),
+                                         # normalize
+                                     ]))
+        val_set = datasets.CIFAR10('data/', train=False,
+                                   transform=transforms.Compose([
+                                       transforms.ToTensor(),
+                                       # normalize
+                                   ]))
+        trainloader_cifar10 = data.DataLoader(
+        train_set,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=n_workers,
+        pin_memory=True,)
+        testloader_cifar10 = data.DataLoader(
+        val_set,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=n_workers,
+        pin_memory=True,)
+        # normalize = transforms.Normalize(mean=[0.5071, 0.4867, 0.4408],
+        #                                  std=[0.2675, 0.2565, 0.2761])
+        train_set = datasets.CIFAR100('data/', train=True, download=True,
+                                      transform=transforms.Compose([
+                                          transforms.RandomCrop(32, padding=4),
+                                          transforms.RandomHorizontalFlip(),
+                                          transforms.ToTensor(),
+                                          # normalize
+                                      ]))
+        val_set = datasets.CIFAR100('data/', train=False, download=True,
+                                    transform=transforms.Compose([
+                                        transforms.ToTensor(),
+                                        # normalize
+                                    ]))
+        trainloader_cifar100 = data.DataLoader(
+            train_set,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=n_workers,
+            pin_memory=True, )
+        testloader_cifar100 = data.DataLoader(
+            val_set,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=n_workers,
+            pin_memory=True, )
+        from our_dataset_utils import get_dataloader
+        class Identity(object):
+            """Convert ndarrays in sample to Tensors."""
+
+            def __call__(self, sample):
+                return sample
+
+        normalizer = Identity()
+        trainloader_svhn, _ = get_svhn_loaders(
+            data_transform, osj(root, "svhn"), batch_size, n_workers
+        )
+        testloader_svhn = get_dataloader('svhn', normalizer, bs=batch_size,
+                                         is_large_image=False)
+
+
     # Load out of distribution datasets
     loaders_dict = {}
     for name in testsets_names:
@@ -269,6 +342,32 @@ def get_dataloaders(
         elif name == "Gaussian":
             loaders_dict["Gaussian"] = get_gaussian_noise_loader(
                 data_transform, batch_size, n_workers
+            )
+        elif model_name != 'resnet' and 'resnet' in model_name and name in \
+                ['iSUN', 'LSUN_resize', 'LSUN', 'Imagenet_resize',
+                 'Imagenet']:
+            from our_dataset_utils import get_dataloader
+            class Identity(object):
+                """Convert ndarrays in sample to Tensors."""
+
+                def __call__(self, sample):
+                    return sample
+            normalizer = Identity()
+            pnml_to_our_name = {'iSUN': 'isun',
+                                'LSUN_resize': 'lsunR',
+                                'LSUN': 'lsun',
+                                'Imagenet_resize': 'TinyR',
+                                'Imagenet': 'TinyC',
+                                }
+            loaders_dict[name] = get_dataloader(
+                pnml_to_our_name[name],
+                normalizer,
+                bs=batch_size, is_large_image=False)
+        elif name == 'SVHN' and model_name == 'resnet' or model_name == \
+                'densenet':
+            data_transform = transforms.Compose([transforms.ToTensor(),])
+            loaders_dict[name] = get_image_folder_loader(
+                data_transform, osj(root, name), batch_size, n_workers
             )
         else:
             loaders_dict[name] = get_image_folder_loader(
