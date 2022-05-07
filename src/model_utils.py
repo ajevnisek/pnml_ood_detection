@@ -11,7 +11,7 @@ from model_arch_utils.densenet import DenseNet3
 from model_arch_utils.densenet_gram import DenseNet3Gram
 from model_arch_utils.resnet import ResNet34
 from model_arch_utils.resnet_gram import ResNet34Gram
-from model_arch_utils.our_resnets import ResNet18
+from model_arch_utils.our_resnets import ResNet18, ResNet18ForImagenet30
 from model_arch_utils.our_resnets import ResNet34 as OurResNet34
 from model_arch_utils.madrys_resnet import MadrysResnet
 from model_arch_utils.wrn import WideResNet
@@ -59,6 +59,11 @@ def get_model(
             model = ResNet34(num_c=10)
         elif trainset_name == "cifar100":
             model = ResNet34(num_c=100)
+        else:
+            raise ValueError(f"trainset_name={trainset_name} is not supported")
+    elif model_name == 'imagenet30':
+        if trainset_name == 'imagenet30':
+            model = ResNet18ForImagenet30(30)
         else:
             raise ValueError(f"trainset_name={trainset_name} is not supported")
     elif model_name.endswith("imagenet"):

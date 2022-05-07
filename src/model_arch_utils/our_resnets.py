@@ -7,7 +7,7 @@ Reference:
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import torchvision
 
 class BasicBlock(nn.Module):
     expansion = 1
@@ -129,3 +129,27 @@ def ResNet101(num_classes: int = 10):
 def ResNet152(num_classes: int = 10):
     return ResNet(Bottleneck, [3, 8, 36, 3], num_classes=num_classes)
 
+
+class ResNet18ForImagenet30(nn.Module):
+    def __init__(self, num_classes: int = 30):
+        super(ResNet18ForImagenet30, self).__init__()
+        self.model = torchvision.models.resnet18(pretrained=False)
+        self.linear = nn.Linear(1000, num_classes)
+
+    def classifier(self, x):
+        return self.forward(x)
+
+    def backbone(self, x):
+        return self.model(x)
+
+    def get_features(self):
+        return self.out_features
+
+    def load(self, path):
+        state_dict = torch.load(path)['net']
+        self.load_state_dict(state_dict)
+
+    def forward(self, x):
+        self.out_features = self.model(x)
+        logits = self.linear(self.out_features)
+        return logits

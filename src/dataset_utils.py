@@ -233,6 +233,11 @@ def get_data_transform(model_name: str):
                 ),
             ]
         )
+    elif model_name == 'imagenet30':
+        data_transform = transforms.Compose([
+            transforms.Resize((254, 254)),
+            transforms.ToTensor(),
+        ])
     else:
         raise ValueError(f"{model_name} is not supported")
 
