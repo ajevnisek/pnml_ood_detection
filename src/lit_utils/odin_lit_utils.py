@@ -84,7 +84,7 @@ class LitOdin(LitBaseline):
                 torch.LongTensor([2]).cuda(),
                 gradient.index_select(1, torch.LongTensor([2]).cuda()) / (66.7 / 255.0),
             )
-        elif "resnet" in model_name.lower():
+        elif "resnet" == model_name:
             gradient.index_copy_(
                 1,
                 torch.LongTensor([0]).cuda(),
@@ -100,6 +100,8 @@ class LitOdin(LitBaseline):
                 torch.LongTensor([2]).cuda(),
                 gradient.index_select(1, torch.LongTensor([2]).cuda()) / (0.2010),
             )
+        elif "resnet" in model_name.lower():
+            gradient = gradient
         else:
             raise ValueError(f"{model_name} is not supported")
 
